@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>All Listings - HomeLink Nigeria</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+  <style>
+    /* Same as before — keep consistent styles */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body { background: #f8f9fa; color: #333; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    header { background: white; padding: 15px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .header-content { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+    .logo { font-size: 24px; font-weight: bold; color: #007bff; }
+    nav a { margin-left: 20px; color: #333; }
+    h1 { margin: 30px 0; }
+
+    .filters {
+      display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 30px; background: white; padding: 15px; border-radius: 10px;
+    }
+    .filters select, .filters input {
+      padding: 10px; border: 1px solid #ddd; border-radius: 5px;
+    }
+
+    .listing-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;
+    }
+    .listing-card {
+      background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .listing-img { width: 100%; height: 200px; object-fit: cover; }
+    .listing-info { padding: 15px; }
+    .price { font-weight: bold; color: #28a745; }
+    .location { color: #666; font-size: 0.9rem; }
+    .whatsapp { display: inline-block; background: #25D366; color: white; padding: 8px 12px; border-radius: 5px; font-size: 0.9rem; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-content">
+      <div class="logo">HomeLink.ng</div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="listings.html">Listings</a>
+        <a href="contact.html">Contact</a>
+        <a href="mailto:admin@homelink.ng" class="btn">List Property</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <h1>All Properties</h1>
+
+    <!-- Filters -->
+    <div class="filters">
+      <select id="filter-location">
+        <option value="">All Locations</option>
+        <option value="Lagos">Lagos</option>
+        <option value="Abuja">Abuja</option>
+        <option value="Port Harcourt">PH</option>
+      </select>
+      <select id="filter-bedrooms">
+        <option value="">Any Bedrooms</option>
+        <option value="1">1 Bedroom</option>
+        <option value="2">2 Bedrooms</option>
+        <option value="3">3+ Bedrooms</option>
+      </select>
+      <input type="number" id="max-price" placeholder="Max Price" />
+      <button onclick="filterListings()">Filter</button>
+    </div>
+
+    <!-- Listings Grid -->
+    <div class="listing-grid" id="listings-container">
+      <!-- Listings will be injected here by JS -->
+    </div>
+  </div>
+
+  <script>
+    // Sample Property Data (Replace with Google Sheet or Formspree later)
+    const properties = [
+      {
+        title: "3-Bedroom Flat",
+        price: 2500000,
+        location: "Lagos",
+        bedrooms: 3,
+        image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
+        whatsapp: "2348123456789"
+      },
+      {
+        title: "2-Bedroom Apartment",
+        price: 1800000,
+        location: "Abuja",
+        bedrooms: 2,
+        image: "https://images.unsplash.com/photo-1564669692884-c217db9d8b81",
+        whatsapp: "2348123456789"
+      },
+      {
+        title: "Mini Flat (Self-Contain)",
+        price: 800000,
+        location: "Lagos",
+        bedrooms: 1,
+        image: "https://images.unsplash.com/photo-1505873242700-f289a29e1e0f",
+        whatsapp: "2348123456789"
+      }
+    ];
+
+    // Display All Listings on Load
+    function loadListings() {
+      const container = document.getElementById('listings-container');
+      container.innerHTML = '';
+      properties.forEach(prop => {
+        container.innerHTML += `
+          <div class="listing-card" data-location="${prop.location}" data-bedrooms="${prop.bedrooms}" data-price="${prop.price}">
+            <img src="${prop.image}" alt="${prop.title}" class="listing-img" />
+            <div class="listing-info">
+              <h3>${prop.title}</h3>
+              <p class="price">₦${prop.price.toLocaleString()}/year</p>
+              <p class="location"><i class="fas fa-map-marker-alt"></i> ${prop.location}</p>
+              <a href="https://wa.me/${prop.whatsapp}?text=Hi,%20I%20saw%20your%20listing%20on%20HomeLink.ng" class="whatsapp" target="_blank">
+                <i class="fab fa-whatsapp"></i> Chat Agent
+              </a>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // Filter Listings
+    function filterListings() {
+      const location = document.getElementById('filter-location').value;
+      const bedrooms = document.getElementById('filter-bedrooms').value;
+      const maxPrice = document.getElementById('max-price').value || Infinity;
+
+      const filtered = properties.filter(prop => {
+        return (location === '' || prop.location === location) &&
+               (bedrooms === '' || prop.bedrooms == bedrooms) &&
+               (prop.price <= maxPrice);
+      });
+
+      const container = document.getElementById('listings-container');
+      container.innerHTML = '';
+      if (filtered.length === 0) {
+        container.innerHTML = '<p>No properties match your filters.</p>';
+      } else {
+        filtered.forEach(prop => {
+          container.innerHTML += `
+            <div class="listing-card">
+              <img src="${prop.image}" alt="${prop.title}" class="listing-img" />
+              <div class="listing-info">
+                <h3>${prop.title}</h3>
+                <p class="price">₦${prop.price.toLocaleString()}/year</p>
+                <p class="location"><i class="fas fa-map-marker-alt"></i> ${prop.location}</p>
+                <a href="https://wa.me/${prop.whatsapp}?text=Hi,%20I%20saw%20your%20listing%20on%20HomeLink.ng" class="whatsapp" target="_blank">
+                  <i class="fab fa-whatsapp"></i> Chat Agent
+                </a>
+              </div>
+            </div>
+          `;
+        });
+      }
+    }
+
+    // Load on startup
+    window.onload = loadListings;
+  </script>
+
+</body>
+</html>
